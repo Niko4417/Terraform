@@ -6,9 +6,12 @@ terraform {
     }
   }
 }
+resource "random_id" "suffix" {
+  byte_length = 4
+}
 
 resource "aws_s3_bucket" "s3" {
-  bucket = var.bucket_name
+  bucket = "${var.bucket_name}-${random_id.suffix.hex}"
   tags   = var.tags
 }
 
