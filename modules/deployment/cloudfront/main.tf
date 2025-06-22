@@ -6,7 +6,9 @@ terraform {
     }
   }
 }
-
+resource "aws_cloudfront_origin_access_identity" "cloudfront" {
+  comment = "Access Identity for CloudFront to access private S3 bucket"
+}
 resource "aws_cloudfront_distribution" "cloudfront" {
 
   enabled             = true
@@ -19,11 +21,8 @@ resource "aws_cloudfront_distribution" "cloudfront" {
     origin_id   = "s3-${var.s3_bucket_name}"
 
 
-    custom_origin_config {
-      origin_protocol_policy = "http-only"
-      http_port = 80
-      https_port = 443
-      origin_ssl_protocols   = ["TLSv1.2"]
+    s3_origin_config {
+      origin_access_identity = "origin-access-identity/cloudfront/${var.cloudfront_oai_id}"
 
     }
   }
@@ -46,6 +45,7 @@ resource "aws_cloudfront_distribution" "cloudfront" {
   viewer_certificate {
     cloudfront_default_certificate = true
   }
+
   restrictions {
     geo_restriction {
       restriction_type = "none"

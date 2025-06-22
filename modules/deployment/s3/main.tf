@@ -29,28 +29,28 @@ resource "aws_s3_bucket_website_configuration" "s3" {
 
 resource "aws_s3_bucket_public_access_block" "unblock" {
   bucket                  = aws_s3_bucket.s3.id
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_policy" "public_read" {
+resource "aws_s3_bucket_policy" "cloudfront" {
   bucket = aws_s3_bucket.s3.id
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "PublicReadGetObject",
+        Sid       = "AllowCloudFrontRead",
         Effect    = "Allow",
-        Principal = "*",
-        Action    = ["s3:GetObject"]
-        Resource = [
-          "${aws_s3_bucket.s3.arn}/*"
-        ]
+        Principal = {
+          AWS = "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${var.cloudfront_oai_id}"
+        },
+        Action    = "s3:GetObject",
+        Resource  = "${aws_s3_bucket.s3.arn}/*"
       }
     ]
   })
-  depends_on = [aws_s3_bucket_public_access_block.unblock]
 }
 

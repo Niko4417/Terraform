@@ -8,3 +8,6 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+variable "cloudfront_oai_id" {
+  type        = string
+}
